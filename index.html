@@ -1,0 +1,487 @@
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap');
+
+  #jp-app {
+    --paper: #EDE7DC;
+    --paper-2: #E4DCC9;
+    --paper-3: #F5F1E6;
+    --ink: #2A2A26;
+    --ink-soft: #5B564C;
+    --indigo: #2F4864;
+    --indigo-soft: #6C8AA6;
+    --seal: #B33A3A;
+    --moss: #6E7A52;
+    --border: #C9BFA9;
+
+    --serif: 'Shippori Mincho', serif;
+    --thai: 'Noto Sans Thai', 'Noto Sans', sans-serif;
+
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--thai);
+    border-radius: 4px;
+    padding: 0;
+    max-width: 640px;
+    margin: 0 auto;
+    box-sizing: border-box;
+  }
+  #jp-app * { box-sizing: border-box; }
+
+  .jp-header { padding: 28px 24px 18px; border-bottom: 1px solid var(--border); }
+  .jp-header h1 { font-family: var(--serif); font-size: 28px; font-weight: 700; color: var(--indigo); margin: 0 0 4px; letter-spacing: 0.02em; }
+  .jp-header p { margin: 0; color: var(--ink-soft); font-size: 14px; }
+
+  .jp-tabs-row { display: flex; align-items: flex-end; padding: 14px 24px 0; gap: 8px; }
+  .jp-tab {
+    font-family: var(--thai); font-weight: 600; font-size: 14px;
+    padding: 10px 18px 12px; background: var(--paper-2); color: var(--ink-soft);
+    border: 1px solid var(--border); border-bottom: none; border-radius: 6px 6px 0 0;
+    cursor: pointer; position: relative; top: 1px; transition: color 0.15s ease;
+  }
+  .jp-tab.active { background: var(--paper-3); color: var(--indigo); border-bottom: 1px solid var(--paper-3); }
+  .jp-tab:not(.active):hover { color: var(--ink); }
+
+  .jp-panel { background: var(--paper-3); border: 1px solid var(--border); border-radius: 0 6px 6px 6px; min-height: 360px; padding: 24px; }
+
+  .jp-item-tag-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+  .jp-item-tag { display: inline-block; font-size: 11px; color: var(--moss); border: 1px solid var(--moss); border-radius: 3px; padding: 1px 6px; width: fit-content; }
+  .jp-item-verbgroup { display: inline-block; font-size: 11px; color: var(--indigo); border: 1px solid var(--indigo-soft); border-radius: 3px; padding: 1px 6px; width: fit-content; }
+
+  .jp-filter-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-size: 13px; color: var(--ink-soft); flex-wrap: wrap; }
+  .jp-filter-row select { font-family: var(--thai); font-size: 13px; padding: 6px 8px; border: 1px solid var(--border); border-radius: 4px; background: #fff; color: var(--ink); }
+
+  .jp-btn { font-family: var(--thai); font-weight: 600; font-size: 14px; padding: 9px 18px; border-radius: 4px; border: 1px solid var(--indigo); background: var(--indigo); color: var(--paper-3); cursor: pointer; }
+  .jp-btn:hover { background: #24384f; }
+
+  .jp-empty { text-align: center; padding: 40px 20px; color: var(--ink-soft); font-size: 14px; line-height: 1.7; }
+  .jp-empty .jp-empty-glyph { font-family: var(--serif); font-size: 36px; color: var(--border); display: block; margin-bottom: 10px; }
+
+  .jp-review-wrap { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+  .jp-review-progress { font-size: 13px; color: var(--ink-soft); }
+  .jp-flashcard { width: 100%; max-width: 380px; height: 240px; perspective: 1000px; cursor: pointer; }
+  .jp-flashcard-inner { position: relative; width: 100%; height: 100%; transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); transform-style: preserve-3d; }
+  .jp-flashcard.flipped .jp-flashcard-inner { transform: rotateY(180deg); }
+  .jp-flashcard-face { position: absolute; inset: 0; backface-visibility: hidden; border: 1px solid var(--border); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
+  .jp-flashcard-front { background: var(--paper); }
+  .jp-flashcard-back { background: var(--indigo); color: var(--paper-3); transform: rotateY(180deg); }
+  .jp-flashcard-word { font-family: var(--serif); font-size: 40px; margin-bottom: 8px; }
+  .jp-flashcard-reading { font-size: 15px; color: var(--indigo-soft); }
+  .jp-flashcard-back .jp-flashcard-reading { color: var(--paper-2); }
+  .jp-flashcard-meaning { font-family: var(--serif); font-size: 22px; margin-bottom: 6px; }
+  .jp-flashcard-example { font-size: 13px; opacity: 0.85; margin-top: 8px; max-width: 300px; }
+  .jp-flashcard-hint { font-size: 12px; color: var(--ink-soft); }
+
+  .jp-known-row { display: flex; gap: 10px; }
+  .jp-mark-btn { font-family: var(--thai); font-size: 13px; font-weight: 600; padding: 8px 16px; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); background: var(--paper); color: var(--ink-soft); }
+  .jp-mark-btn.know { border-color: var(--indigo); color: var(--indigo); }
+  .jp-mark-btn.know:hover { background: var(--indigo); color: #fff; }
+  .jp-mark-btn.dontknow { border-color: var(--seal); color: var(--seal); }
+  .jp-mark-btn.dontknow:hover { background: var(--seal); color: #fff; }
+
+  .jp-session-summary { text-align: center; padding: 30px 10px; }
+  .jp-stamp { display: inline-block; font-family: var(--serif); font-size: 15px; color: var(--seal); border: 2px solid var(--seal); border-radius: 6px; padding: 8px 18px; transform: rotate(-4deg); margin: 14px 0; }
+
+  .jp-quiz-progress { font-size: 13px; color: var(--ink-soft); margin-bottom: 14px; }
+  .jp-quiz-question { font-family: var(--serif); font-size: 32px; text-align: center; margin: 10px 0 6px; }
+  .jp-quiz-reading { text-align: center; font-size: 14px; color: var(--indigo-soft); margin-bottom: 22px; }
+  .jp-quiz-options { display: flex; flex-direction: column; gap: 10px; }
+  .jp-quiz-option { font-family: var(--thai); font-size: 14px; text-align: left; padding: 12px 14px; border: 1px solid var(--border); border-radius: 5px; background: var(--paper); cursor: pointer; color: var(--ink); }
+  .jp-quiz-option:hover:not(:disabled) { border-color: var(--indigo-soft); }
+  .jp-quiz-option.correct { border-color: var(--indigo); background: #E4EBF0; color: var(--indigo); font-weight: 600; }
+  .jp-quiz-option.incorrect { border-color: var(--seal); background: #F5E4E1; color: var(--seal); }
+  .jp-quiz-option:disabled { cursor: default; opacity: 0.85; }
+  .jp-quiz-next-row { margin-top: 18px; text-align: center; }
+  .jp-quiz-result { text-align: center; padding: 20px 10px; }
+  .jp-quiz-score { font-family: var(--serif); font-size: 48px; color: var(--indigo); margin: 10px 0; }
+
+  .jp-guide-card { background: var(--paper); border: 1px solid var(--border); border-radius: 6px; padding: 16px 18px; margin-bottom: 14px; }
+  .jp-guide-card h3 { font-family: var(--serif); font-size: 18px; color: var(--indigo); margin: 0 0 6px; display: flex; align-items: center; gap: 8px; }
+  .jp-guide-card .jp-guide-num { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: var(--indigo); color: var(--paper-3); font-family: var(--thai); font-size: 13px; font-weight: 700; }
+  .jp-guide-card p { font-size: 13px; color: var(--ink-soft); line-height: 1.7; margin: 0 0 8px; }
+  .jp-guide-formula { font-family: var(--serif); font-size: 14px; color: var(--ink); background: var(--paper-2); border-radius: 4px; padding: 8px 12px; margin-bottom: 10px; }
+  .jp-guide-examples { display: flex; flex-direction: column; gap: 4px; }
+  .jp-guide-example { font-size: 13px; color: var(--ink); display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; border-bottom: 1px dashed var(--border); }
+  .jp-guide-example:last-child { border-bottom: none; }
+  .jp-guide-example .jp-guide-word { font-family: var(--serif); }
+  .jp-guide-example .jp-guide-meaning { color: var(--ink-soft); font-size: 12px; }
+
+  @media (max-width: 480px) {
+    .jp-header { padding: 22px 16px 14px; }
+    .jp-tabs-row { padding: 12px 16px 0; }
+    .jp-panel { padding: 16px; }
+  }
+</style>
+
+<div id="jp-app"></div>
+
+<script>
+(function() {
+  const root = document.getElementById('jp-app');
+
+  const VOCAB = [
+    { "id": "vmtmh4rxwzz23n", "word": "しめる", "reading": "", "meaning": "ปิด (ประตู, หน้าต่าง)", "example": "", "tag": "14", "verbGroup": "2", "masuForm": "しめます" },
+    { "id": "vmtmh4ezfa3i5o", "word": "あける", "reading": "", "meaning": "เปิด (ประตู, หน้าต่าง)", "example": "", "tag": "14", "verbGroup": "2", "masuForm": "あけます" },
+    { "id": "vmtmh44pg34zq0", "word": "けす", "reading": "", "meaning": "ปิด (ไฟ, เครื่องปรับอากาศ)", "example": "", "tag": "14", "verbGroup": "1", "masuForm": "けします" },
+    { "id": "vmtmh3t7o2mas4", "word": "つける", "reading": "", "meaning": "เปิด (ไฟ, เครื่องปรับอากาศ)", "example": "", "tag": "14", "verbGroup": "2", "masuForm": "つけます" }
+  ];
+
+  let state = {
+    vocab: VOCAB,
+    tab: 'review',
+    filterGroup: '',
+    filterTag: '',
+    review: { order: [], index: 0, flipped: false, known: 0, dontknow: 0, finished: false },
+    quiz: { questions: [], index: 0, score: 0, selected: null, finished: false, tooFew: false }
+  };
+
+  function esc(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function getFilteredVocab() {
+    return state.vocab.filter(v => {
+      const groupOk = !state.filterGroup || (v.verbGroup || '') === state.filterGroup;
+      const tagOk = !state.filterTag || (v.tag || '') === state.filterTag;
+      return groupOk && tagOk;
+    });
+  }
+
+  function setTab(tab) {
+    state.tab = tab;
+    if (tab === 'review') startReview();
+    if (tab === 'quiz') startQuiz();
+    render();
+  }
+
+  function setFilterGroup(val) {
+    state.filterGroup = val;
+    if (state.tab === 'review') startReview();
+    if (state.tab === 'quiz') startQuiz();
+    render();
+  }
+
+  function setFilterTag(val) {
+    state.filterTag = val;
+    if (state.tab === 'review') startReview();
+    if (state.tab === 'quiz') startQuiz();
+    render();
+  }
+
+  // ---------- Review ----------
+  function startReview() {
+    const order = shuffle(getFilteredVocab().map(v => v.id));
+    state.review = { order, index: 0, flipped: false, known: 0, dontknow: 0, finished: order.length === 0 };
+  }
+
+  function flipCard() { state.review.flipped = !state.review.flipped; render(); }
+
+  function markCard(known) {
+    if (known) state.review.known++; else state.review.dontknow++;
+    nextCard();
+  }
+
+  function nextCard() {
+    const r = state.review;
+    if (r.index + 1 >= r.order.length) { r.finished = true; }
+    else { r.index++; r.flipped = false; }
+    render();
+  }
+
+  function restartReview() { startReview(); render(); }
+
+  // ---------- Quiz ----------
+  function buildQuiz() {
+    const pool = shuffle(getFilteredVocab());
+    const count = Math.min(10, pool.length);
+    const chosen = pool.slice(0, count);
+    return chosen.map(v => {
+      const others = state.vocab.filter(x => x.id !== v.id).map(x => x.meaning);
+      const distractors = shuffle(others).slice(0, 3);
+      const options = shuffle([v.meaning, ...distractors]);
+      return { id: v.id, word: v.word, reading: v.reading, correct: v.meaning, options };
+    });
+  }
+
+  function startQuiz() {
+    if (state.vocab.length < 2 || getFilteredVocab().length === 0) {
+      state.quiz = { questions: [], index: 0, score: 0, selected: null, finished: false, tooFew: true };
+      return;
+    }
+    state.quiz = { questions: buildQuiz(), index: 0, score: 0, selected: null, finished: false, tooFew: false };
+  }
+
+  function selectOption(opt) {
+    if (state.quiz.selected !== null) return;
+    state.quiz.selected = opt;
+    if (opt === state.quiz.questions[state.quiz.index].correct) state.quiz.score++;
+    render();
+  }
+
+  function nextQuestion() {
+    const q = state.quiz;
+    if (q.index + 1 >= q.questions.length) { q.finished = true; }
+    else { q.index++; q.selected = null; }
+    render();
+  }
+
+  function restartQuiz() { startQuiz(); render(); }
+
+  // ---------- Render ----------
+  function renderFilterRow() {
+    const tags = Array.from(new Set(state.vocab.map(v => v.tag).filter(Boolean))).sort();
+    return `
+      <div class="jp-filter-row">
+        <span>กรองตามกลุ่มคำกริยา:</span>
+        <select id="jp-filter-group">
+          <option value="" ${state.filterGroup === '' ? 'selected' : ''}>ทั้งหมด</option>
+          <option value="1" ${state.filterGroup === '1' ? 'selected' : ''}>กลุ่ม 1 (u-verb)</option>
+          <option value="2" ${state.filterGroup === '2' ? 'selected' : ''}>กลุ่ม 2 (ru-verb)</option>
+          <option value="3" ${state.filterGroup === '3' ? 'selected' : ''}>กลุ่ม 3 (อื่นๆ)</option>
+        </select>
+        ${tags.length > 0 ? `
+          <span>บทเรียน:</span>
+          <select id="jp-filter-tag">
+            <option value="" ${state.filterTag === '' ? 'selected' : ''}>ทั้งหมด</option>
+            ${tags.map(t => `<option value="${esc(t)}" ${state.filterTag === t ? 'selected' : ''}>${esc(t)}</option>`).join('')}
+          </select>
+        ` : ''}
+      </div>
+    `;
+  }
+
+  function render() {
+    const tabs = [
+      { id: 'review', label: 'ทบทวน' },
+      { id: 'quiz', label: 'แบบทดสอบ' },
+      { id: 'guide', label: 'กลุ่มคำกริยา' }
+    ];
+
+    root.innerHTML = `
+      <div class="jp-header">
+        <h1>語彙 &nbsp;คลังคำศัพท์ญี่ปุ่น</h1>
+        <p>ทบทวนด้วยการ์ดหรือทำแบบทดสอบ</p>
+        <p style="margin-top:4px; font-size:12px; color:var(--ink-soft);">อัปเดตล่าสุด: 4 กันยายน 2569</p>
+      </div>
+      <div class="jp-tabs-row">
+        ${tabs.map(t => `<div class="jp-tab ${state.tab === t.id ? 'active' : ''}" data-action="set-tab" data-tab="${t.id}">${t.label}</div>`).join('')}
+      </div>
+      <div class="jp-panel" id="jp-panel"></div>
+    `;
+
+    const panel = document.getElementById('jp-panel');
+    if (state.tab === 'quiz') renderQuiz(panel);
+    else if (state.tab === 'guide') renderGuide(panel);
+    else renderReview(panel);
+  }
+
+  function renderGuide(panel) {
+    const groups = [
+      {
+        num: '1',
+        title: 'กลุ่ม 1 (u-verb / godan)',
+        desc: 'คำกริยาที่ dictionary form ลงท้ายด้วยเสียงสระ う (う, く, ぐ, す, つ, ぬ, ぶ, む, る) โดยที่ る ในกลุ่มนี้ พยางค์หน้าจะ "ไม่ใช่" เสียง い หรือ え เช่น 乗る (のる) หรือ 帰る (かえる)',
+        formula: 'วิธีผัน ます: เปลี่ยนเสียงท้ายจากแถว う เป็นแถว い แล้วเติม ます เช่น 飲む (のむ) → 飲みます, 話す (はなす) → 話します',
+        fallback: [
+          { word: '飲む (のむ)', meaning: 'ดื่ม' },
+          { word: '話す (はなす)', meaning: 'พูด' },
+          { word: '乗る (のる)', meaning: 'ขึ้น (รถ)' }
+        ]
+      },
+      {
+        num: '2',
+        title: 'กลุ่ม 2 (ru-verb / ichidan)',
+        desc: 'คำกริยาที่ dictionary form ลงท้ายด้วย いる หรือ える เช่น 食べる (たべる), 見る (みる)',
+        formula: 'วิธีผัน ます: ตัด る ออกแล้วเติม ます ตรงๆ เช่น 食べる → 食べます, 見る → 見ます',
+        fallback: [
+          { word: '食べる (たべる)', meaning: 'กิน' },
+          { word: '見る (みる)', meaning: 'ดู' },
+          { word: '起きる (おきる)', meaning: 'ตื่นนอน' }
+        ]
+      },
+      {
+        num: '3',
+        title: 'กลุ่ม 3 (อื่นๆ / ผันแบบไม่ปกติ)',
+        desc: 'มีอยู่แค่ 2 คำหลักในกลุ่มนี้ คือ する (ทำ) และ 来る (มา) ซึ่งผันไม่ตามกฎของกลุ่ม 1 และ 2',
+        formula: 'วิธีผัน ます: する → します, 来る (くる) → 来ます (きます) ต้องจำแยกเป็นคำๆ ไป',
+        fallback: [
+          { word: 'する', meaning: 'ทำ' },
+          { word: '来る (くる)', meaning: 'มา' }
+        ]
+      }
+    ];
+
+    panel.innerHTML = `
+      <div style="font-size:13px; color:var(--ink-soft); margin-bottom:16px;">
+        สรุปหลักการแบ่งกลุ่มคำกริยาภาษาญี่ปุ่น และวิธีผันเป็นรูป ます ของแต่ละกลุ่ม
+      </div>
+      ${groups.map(g => {
+        const matches = state.vocab.filter(v => v.verbGroup === g.num);
+        const examples = matches.length > 0
+          ? matches.slice(0, 5).map(v => ({ word: v.word + (v.reading ? ` (${v.reading})` : ''), meaning: v.meaning }))
+          : g.fallback;
+        return `
+          <div class="jp-guide-card">
+            <h3><span class="jp-guide-num">${g.num}</span>${esc(g.title)}</h3>
+            <p>${esc(g.desc)}</p>
+            <div class="jp-guide-formula">${esc(g.formula)}</div>
+            <div class="jp-guide-examples">
+              ${examples.map(ex => `
+                <div class="jp-guide-example">
+                  <span class="jp-guide-word">${esc(ex.word)}</span>
+                  <span class="jp-guide-meaning">${esc(ex.meaning)}</span>
+                </div>
+              `).join('')}
+            </div>
+            ${matches.length > 0 ? `<div style="font-size:11px; color:var(--moss); margin-top:8px;">* ตัวอย่างจากคำศัพท์ในคลังของคุณ</div>` : ''}
+          </div>
+        `;
+      }).join('')}
+    `;
+  }
+
+  function renderReview(panel) {
+    if (state.vocab.length === 0) {
+      panel.innerHTML = `<div class="jp-empty"><span class="jp-empty-glyph">習</span>ยังไม่มีคำศัพท์</div>`;
+      return;
+    }
+    const r = state.review;
+    if (getFilteredVocab().length === 0) {
+      panel.innerHTML = `
+        ${renderFilterRow()}
+        <div class="jp-empty"><span class="jp-empty-glyph">空</span>ไม่มีคำศัพท์ในกลุ่มที่เลือก<br/>ลองเปลี่ยนตัวกรองดู</div>`;
+      return;
+    }
+    if (r.finished) {
+      panel.innerHTML = `
+        ${renderFilterRow()}
+        <div class="jp-session-summary">
+          <div style="color:var(--ink-soft); font-size:14px;">ทบทวนครบแล้ว</div>
+          <div class="jp-stamp">済 ทบทวนเสร็จ</div>
+          <div style="font-size:15px; margin-top:6px;">รู้แล้ว ${r.known} คำ · ยังไม่รู้ ${r.dontknow} คำ</div>
+          <div style="margin-top:20px;"><button class="jp-btn" data-action="restart-review">ทบทวนอีกรอบ</button></div>
+        </div>`;
+      return;
+    }
+    const v = state.vocab.find(x => x.id === r.order[r.index]);
+    if (!v) { nextCard(); return; }
+    panel.innerHTML = `
+      ${renderFilterRow()}
+      <div class="jp-review-wrap">
+        <div class="jp-review-progress">คำที่ ${r.index + 1} / ${r.order.length}</div>
+        <div class="jp-flashcard ${r.flipped ? 'flipped' : ''}" data-action="flip-card">
+          <div class="jp-flashcard-inner">
+            <div class="jp-flashcard-face jp-flashcard-front">
+              <div class="jp-flashcard-word">${esc(v.word)}</div>
+              ${v.reading ? `<div class="jp-flashcard-reading">${esc(v.reading)}</div>` : ''}
+              ${v.masuForm ? `<div class="jp-flashcard-reading" style="margin-top:6px;">ます: ${esc(v.masuForm)}</div>` : ''}
+              ${(v.tag || v.verbGroup) ? `
+                <div class="jp-item-tag-row" style="justify-content:center; margin-top:10px;">
+                  ${v.verbGroup ? `<span class="jp-item-verbgroup">กลุ่ม ${esc(v.verbGroup)}</span>` : ''}
+                  ${v.tag ? `<span class="jp-item-tag">${esc(v.tag)}</span>` : ''}
+                </div>
+              ` : ''}
+              <div class="jp-flashcard-hint" style="margin-top:14px;">แตะเพื่อดูความหมาย</div>
+            </div>
+            <div class="jp-flashcard-face jp-flashcard-back">
+              <div class="jp-flashcard-meaning">${esc(v.meaning)}</div>
+              ${v.example ? `<div class="jp-flashcard-example">${esc(v.example)}</div>` : ''}
+            </div>
+          </div>
+        </div>
+        <div class="jp-known-row">
+          <button class="jp-mark-btn dontknow" data-action="mark-dontknow">ยังไม่รู้</button>
+          <button class="jp-mark-btn know" data-action="mark-know">รู้แล้ว</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderQuiz(panel) {
+    if (state.vocab.length < 2) {
+      panel.innerHTML = `<div class="jp-empty"><span class="jp-empty-glyph">試</span>ต้องมีคำศัพท์อย่างน้อย 2 คำถึงจะทำแบบทดสอบได้</div>`;
+      return;
+    }
+    if (getFilteredVocab().length === 0) {
+      panel.innerHTML = `
+        ${renderFilterRow()}
+        <div class="jp-empty"><span class="jp-empty-glyph">空</span>ไม่มีคำศัพท์ในกลุ่มที่เลือก<br/>ลองเปลี่ยนตัวกรองดู</div>`;
+      return;
+    }
+    const q = state.quiz;
+    if (q.finished) {
+      panel.innerHTML = `
+        ${renderFilterRow()}
+        <div class="jp-quiz-result">
+          <div style="color:var(--ink-soft); font-size:14px;">ผลการทดสอบ</div>
+          <div class="jp-quiz-score">${q.score} / ${q.questions.length}</div>
+          <button class="jp-btn" data-action="restart-quiz">ทำแบบทดสอบใหม่</button>
+        </div>`;
+      return;
+    }
+    const question = q.questions[q.index];
+    panel.innerHTML = `
+      ${renderFilterRow()}
+      <div class="jp-quiz-progress">ข้อ ${q.index + 1} / ${q.questions.length} · คะแนน ${q.score}</div>
+      <div class="jp-quiz-question">${esc(question.word)}</div>
+      ${question.reading ? `<div class="jp-quiz-reading">${esc(question.reading)}</div>` : ''}
+      <div class="jp-quiz-options">
+        ${question.options.map(opt => {
+          let cls = '';
+          if (q.selected !== null) {
+            if (opt === question.correct) cls = 'correct';
+            else if (opt === q.selected) cls = 'incorrect';
+          }
+          return `<button class="jp-quiz-option ${cls}" data-action="select-option" data-opt="${esc(opt)}" ${q.selected !== null ? 'disabled' : ''}>${esc(opt)}</button>`;
+        }).join('')}
+      </div>
+      ${q.selected !== null ? `<div class="jp-quiz-next-row"><button class="jp-btn" data-action="next-question">${q.index + 1 >= q.questions.length ? 'ดูผลคะแนน' : 'ข้อถัดไป'}</button></div>` : ''}
+    `;
+  }
+
+  // ---------- Delegated events ----------
+  function handleAppClick(e) {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const action = btn.dataset.action;
+    switch (action) {
+      case 'set-tab': setTab(btn.dataset.tab); break;
+      case 'flip-card': flipCard(); break;
+      case 'mark-know': e.stopPropagation(); markCard(true); break;
+      case 'mark-dontknow': e.stopPropagation(); markCard(false); break;
+      case 'restart-review': restartReview(); break;
+      case 'select-option': selectOption(btn.dataset.opt); break;
+      case 'next-question': nextQuestion(); break;
+      case 'restart-quiz': restartQuiz(); break;
+    }
+  }
+
+  function handleAppChange(e) {
+    const t = e.target;
+    if (t.id === 'jp-filter-group') { setFilterGroup(t.value); }
+    if (t.id === 'jp-filter-tag') { setFilterTag(t.value); }
+  }
+
+  window.addEventListener('error', function(ev) {
+    const banner = document.createElement('div');
+    banner.style.cssText = 'background:#F5E4E1;color:#B33A3A;padding:10px 16px;font-size:12px;font-family:sans-serif;border-bottom:1px solid #B33A3A;';
+    banner.textContent = 'เกิดข้อผิดพลาด: ' + ev.message;
+    root.prepend(banner);
+  });
+
+  root.addEventListener('click', handleAppClick);
+  root.addEventListener('change', handleAppChange);
+
+  startReview();
+  render();
+})();
+</script>
