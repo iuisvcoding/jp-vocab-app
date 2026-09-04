@@ -64,6 +64,22 @@
 
   .jp-panel { background: var(--paper-3); border: 1px solid var(--border); border-radius: 0 6px 6px 6px; min-height: 360px; padding: 24px; }
 
+  .jp-list { display: flex; flex-direction: column; gap: 8px; }
+  .jp-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+  }
+  .jp-item-main { display: flex; flex-direction: column; min-width: 0; }
+  .jp-item-word { font-family: var(--serif); font-size: 18px; color: var(--ink); }
+  .jp-item-reading { font-size: 12px; color: var(--indigo-soft); }
+  .jp-item-meaning { font-size: 13px; color: var(--ink-soft); margin-top: 2px; }
+
   .jp-item-tag-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
   .jp-item-tag { display: inline-block; font-size: 11px; color: var(--moss); border: 1px solid var(--moss); border-radius: 3px; padding: 1px 6px; width: fit-content; }
   .jp-item-verbgroup { display: inline-block; font-size: 11px; color: var(--indigo); border: 1px solid var(--indigo-soft); border-radius: 3px; padding: 1px 6px; width: fit-content; }
@@ -126,6 +142,14 @@
   .jp-guide-example .jp-guide-word { font-family: var(--serif); }
   .jp-guide-example .jp-guide-meaning { color: var(--ink-soft); font-size: 12px; }
 
+  .jp-list-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
+  .jp-list-grid .jp-item { height: 100%; align-items: flex-start; }
+
+  .jp-quizmode-row { display: flex; gap: 8px; margin-bottom: 14px; }
+  .jp-quizmode-btn { font-family: var(--thai); font-size: 13px; font-weight: 600; padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border); background: var(--paper); color: var(--ink-soft); cursor: pointer; }
+  .jp-quizmode-btn.active { background: var(--indigo); border-color: var(--indigo); color: var(--paper-3); }
+  .jp-quizmode-btn:not(.active):hover { border-color: var(--indigo-soft); color: var(--indigo); }
+
   @media (max-width: 480px) {
     .jp-header { padding: 22px 16px 14px; }
     .jp-tabs-row { padding: 12px 16px 0; }
@@ -142,10 +166,49 @@
   const root = document.getElementById('jp-app');
 
   const VOCAB = [
-    { "id": "vmtmh4rxwzz23n", "word": "しめる", "reading": "", "meaning": "ปิด (ประตู, หน้าต่าง)", "example": "", "tag": "14", "verbGroup": "2", "masuForm": "しめます" },
-    { "id": "vmtmh4ezfa3i5o", "word": "あける", "reading": "", "meaning": "เปิด (ประตู, หน้าต่าง)", "example": "", "tag": "14", "verbGroup": "2", "masuForm": "あけます" },
-    { "id": "vmtmh44pg34zq0", "word": "けす", "reading": "", "meaning": "ปิด (ไฟ, เครื่องปรับอากาศ)", "example": "", "tag": "14", "verbGroup": "1", "masuForm": "けします" },
-    { "id": "vmtmh3t7o2mas4", "word": "つける", "reading": "", "meaning": "เปิด (ไฟ, เครื่องปรับอากาศ)", "example": "", "tag": "14", "verbGroup": "2", "masuForm": "つけます" }
+    {"id":"vmtmmx7taasru1","word":"あそぶ","reading":"","meaning":"เล่น, (ไป) เที่ยว","example":"","tag":"13","verbGroup":"1","masuForm":"あそびます"},
+    {"id":"vmtmmn426no58b","word":"お釣り","reading":"おつり","meaning":"เงินทอน","example":"","tag":"14","verbGroup":"","masuForm":""},
+    {"id":"vmtmkx46fs5qz9","word":"もう--","reading":"","meaning":"อีก-- (หนึ่งครั้ง หนึ่งวันฯ)","example":"","tag":"14","verbGroup":"","masuForm":""},
+    {"id":"vmtmkwwvhihqmh","word":"もうすこし","reading":"","meaning":"อีกนิด, อีกหน่อย","example":"","tag":"14","verbGroup":"","masuForm":""},
+    {"id":"vmtmkwmxrhaxpt","word":"あとで","reading":"","meaning":"ทีหลัง, ภายหลัง","example":"","tag":"14","verbGroup":"","masuForm":""},
+    {"id":"vmtmkweaipq2sb","word":"また","reading":"","meaning":"(จะมา) ใหม่, อีกครั้ง","example":"","tag":"14","verbGroup":"","masuForm":""},
+    {"id":"vmtmkw700yiqwp","word":"すぐ","reading":"","meaning":"ทันที","example":"","tag":"14","verbGroup":"","masuForm":""},
+    {"id":"vmtmkvxwb34g96","word":"ゆっくり","reading":"","meaning":"(เดิน)ช้าๆ, ค่อยๆ (พักผ่อน) ตามสบาย","example":"","tag":"14","verbGroup":"","masuForm":""},
+    {"id":"vmtmkvp8e7xdjn","word":"まっすぐ","reading":"","meaning":"ตรงไป","example":"","tag":"14","verbGroup":"","masuForm":""},
+    {"id":"vmtmkvgbyjp062","word":"--かた","reading":"","meaning":"วิธี---","example":"","tag":"14","verbGroup":"","masuForm":""},
+    {"id":"vmtmkv7exsj27k","word":"よみかた","reading":"","meaning":"วิธีอ่าน","example":"","tag":"14","verbGroup":"","masuForm":""},
+    {"id":"vmtmkuxm0gh8vp","word":"こたえ","reading":"","meaning":"คำตอบ","example":"","tag":"14","verbGroup":"","masuForm":""},
+    {"id":"vmtmkuoekjwmra","word":"もんだい","reading":"","meaning":"โจทย์, คำถาม, ปัญหา, เรื่องยาก","example":"","tag":"14","verbGroup":"","masuForm":""},
+    {"id":"vmtmkugtts6go3","word":"さとう","reading":"","meaning":"น้ำตาล","example":"","tag":"14","verbGroup":"","masuForm":""},
+    {"id":"vmtmku8ukqubd7","word":"しお","reading":"","meaning":"เกลือ","example":"","tag":"14","verbGroup":"","masuForm":""},
+    {"id":"vmtmku04rukbcs","word":"ちず","reading":"","meaning":"แผนที่","example":"","tag":"14","verbGroup":"","masuForm":""},
+    {"id":"vmtmktqvnlzmb8","word":"じゅうしょ","reading":"","meaning":"ที่อยู่","example":"","tag":"14","verbGroup":"","masuForm":""},
+    {"id":"vmtmkth3lva61d","word":"なまえ","reading":"","meaning":"ชื่อ","example":"","tag":"14","verbGroup":"","masuForm":""},
+    {"id":"vmtmkt9ivj4mho","word":"パスポート","reading":"","meaning":"หนังสือเดินทาง","example":"","tag":"14","verbGroup":"","masuForm":""},
+    {"id":"vmtmkt05da5wmd","word":"エアコン","reading":"","meaning":"เครื่องปรับอากาศ","example":"","tag":"14","verbGroup":"","masuForm":""},
+    {"id":"vmtmksr4jltvbw","word":"でんき","reading":"","meaning":"ไฟฟ้า, แสงไฟ","example":"","tag":"14","verbGroup":"","masuForm":""},
+    {"id":"vmtmksiaue5ror","word":"まがる","reading":"","meaning":"เลี้ยว","example":"","tag":"14","verbGroup":"1","masuForm":"まがります"},
+    {"id":"vmtmkrxwhuobo5","word":"コピーする","reading":"","meaning":"ถ่ายเอกสาร","example":"","tag":"14","verbGroup":"3","masuForm":"コピーします"},
+    {"id":"vmtmkrk8zotj01","word":"ふる","reading":"","meaning":"(ฝน) ตก","example":"","tag":"14","verbGroup":"1","masuForm":"ふります"},
+    {"id":"vmtmkpeoukp08i","word":"でる*","reading":"","meaning":"ออก","example":"","tag":"14","verbGroup":"2","masuForm":"でます"},
+    {"id":"vmtmko4q13tq71","word":"はいる*","reading":"","meaning":"เข้า","example":"","tag":"14","verbGroup":"1","masuForm":"はいります"},
+    {"id":"vmtmknih6e8zmx","word":"たつ","reading":"","meaning":"ยืน, ยืนขึ้น","example":"","tag":"14","verbGroup":"1","masuForm":"たちます"},
+    {"id":"vmtmkn0jdn62pa","word":"すわる","reading":"","meaning":"นั่ง, นั่งลง","example":"","tag":"14","verbGroup":"1","masuForm":"すわります"},
+    {"id":"vmtmkm52m8rvtb","word":"おしえる","reading":"","meaning":"บอก (ที่อยู่)","example":"","tag":"14","verbGroup":"2","masuForm":"おしえます"},
+    {"id":"vmtmkkkz8hs263","word":"みせる","reading":"","meaning":"เอา (หนังสือเดินทาง,รูปถ่ายฯ) ให้ดู","example":"","tag":"14","verbGroup":"2","masuForm":"みせます"},
+    {"id":"vmtmkgqwc03ipz","word":"とめる","reading":"","meaning":"หยุด, จอด","example":"","tag":"14","verbGroup":"2","masuForm":"とめます"},
+    {"id":"vmtmkgc2dudcca","word":"つ かう","reading":"","meaning":"ใช้","example":"","tag":"14","verbGroup":"1","masuForm":"つかいます"},
+    {"id":"vmtmkaxmatxatx","word":"はなす","reading":"","meaning":"พูด, คุย","example":"","tag":"14","verbGroup":"1","masuForm":"はなします"},
+    {"id":"vmtmkag5qzzuek","word":"よぶ","reading":"","meaning":"เรียก (ชื่อ รถแทกซี่ฯ)","example":"","tag":"14","verbGroup":"1","masuForm":"よびます"},
+    {"id":"vmtmka31vyca9k","word":"てつだう","reading":"","meaning":"ช่วยเหลือ, ช่วย (งาน)","example":"","tag":"14","verbGroup":"1","masuForm":"てつだいます"},
+    {"id":"vmtmk9nrob9433","word":"とる","reading":"","meaning":"หยิบ, ส่งให้","example":"","tag":"14","verbGroup":"1","masuForm":"とります"},
+    {"id":"vmtmk993xsguur","word":"もつ","reading":"","meaning":"ถือ","example":"","tag":"14","verbGroup":"1","masuForm":"もちます"},
+    {"id":"vmtmk8x3mucqqd","word":"まつ","reading":"","meaning":"คอย, รอ","example":"","tag":"14","verbGroup":"1","masuForm":"まちます"},
+    {"id":"vmtmk6wmusvr3v","word":"いそぐ","reading":"","meaning":"รีบ","example":"","tag":"14","verbGroup":"1","masuForm":"いそぎます"},
+    {"id":"vmtmh4rxwzz23n","word":"しめる","reading":"","meaning":"ปิด (ประตู, หน้าต่าง)","example":"","tag":"14","verbGroup":"2","masuForm":"しめます"},
+    {"id":"vmtmh4ezfa3i5o","word":"あける","reading":"","meaning":"เปิด (ประตู, หน้าต่าง)","example":"","tag":"14","verbGroup":"2","masuForm":"あけます"},
+    {"id":"vmtmh44pg34zq0","word":"けす","reading":"","meaning":"ปิด (ไฟ, เครื่องปรับอากาศ)","example":"","tag":"14","verbGroup":"1","masuForm":"けします"},
+    {"id":"vmtmh3t7o2mas4","word":"つける","reading":"","meaning":"เปิด (ไฟ, เครื่องปรับอากาศ)","example":"","tag":"14","verbGroup":"2","masuForm":"つけます"}
   ];
 
   let state = {
@@ -154,6 +217,7 @@
     filterGroup: '',
     filterTag: '',
     review: { order: [], index: 0, flipped: false, known: 0, dontknow: 0, finished: false },
+    quizMode: 'meaning',
     quiz: { questions: [], index: 0, score: 0, selected: null, finished: false, tooFew: false }
   };
 
@@ -224,6 +288,16 @@
 
   // ---------- Quiz ----------
   function buildQuiz() {
+    if (state.quizMode === 'group') {
+      const pool = shuffle(getFilteredVocab().filter(v => v.verbGroup));
+      const count = Math.min(10, pool.length);
+      return pool.slice(0, count).map(v => ({
+        id: v.id, word: v.word, reading: v.reading,
+        correct: v.verbGroup,
+        options: ['1', '2', '3'],
+        isGroupQuiz: true
+      }));
+    }
     const pool = shuffle(getFilteredVocab());
     const count = Math.min(10, pool.length);
     const chosen = pool.slice(0, count);
@@ -236,11 +310,22 @@
   }
 
   function startQuiz() {
-    if (state.vocab.length < 2 || getFilteredVocab().length === 0) {
+    if (state.quizMode === 'group') {
+      if (getFilteredVocab().filter(v => v.verbGroup).length === 0) {
+        state.quiz = { questions: [], index: 0, score: 0, selected: null, finished: false, tooFew: true };
+        return;
+      }
+    } else if (state.vocab.length < 2 || getFilteredVocab().length === 0) {
       state.quiz = { questions: [], index: 0, score: 0, selected: null, finished: false, tooFew: true };
       return;
     }
     state.quiz = { questions: buildQuiz(), index: 0, score: 0, selected: null, finished: false, tooFew: false };
+  }
+
+  function setQuizMode(mode) {
+    state.quizMode = mode;
+    startQuiz();
+    render();
   }
 
   function selectOption(opt) {
@@ -260,17 +345,20 @@
   function restartQuiz() { startQuiz(); render(); }
 
   // ---------- Render ----------
-  function renderFilterRow() {
+  function renderFilterRow(showGroupFilter) {
+    if (showGroupFilter === undefined) showGroupFilter = true;
     const tags = Array.from(new Set(state.vocab.map(v => v.tag).filter(Boolean))).sort();
     return `
       <div class="jp-filter-row">
-        <span>กรองตามกลุ่มคำกริยา:</span>
-        <select id="jp-filter-group">
-          <option value="" ${state.filterGroup === '' ? 'selected' : ''}>ทั้งหมด</option>
-          <option value="1" ${state.filterGroup === '1' ? 'selected' : ''}>กลุ่ม 1 (u-verb)</option>
-          <option value="2" ${state.filterGroup === '2' ? 'selected' : ''}>กลุ่ม 2 (ru-verb)</option>
-          <option value="3" ${state.filterGroup === '3' ? 'selected' : ''}>กลุ่ม 3 (อื่นๆ)</option>
-        </select>
+        ${showGroupFilter ? `
+          <span>กรองตามกลุ่มคำกริยา:</span>
+          <select id="jp-filter-group">
+            <option value="" ${state.filterGroup === '' ? 'selected' : ''}>ทั้งหมด</option>
+            <option value="1" ${state.filterGroup === '1' ? 'selected' : ''}>กลุ่ม 1 (u-verb)</option>
+            <option value="2" ${state.filterGroup === '2' ? 'selected' : ''}>กลุ่ม 2 (ru-verb)</option>
+            <option value="3" ${state.filterGroup === '3' ? 'selected' : ''}>กลุ่ม 3 (อื่นๆ)</option>
+          </select>
+        ` : ''}
         ${tags.length > 0 ? `
           <span>บทเรียน:</span>
           <select id="jp-filter-tag">
@@ -284,6 +372,7 @@
 
   function render() {
     const tabs = [
+      { id: 'list', label: 'คำศัพท์ทั้งหมด' },
       { id: 'review', label: 'ทบทวน' },
       { id: 'quiz', label: 'แบบทดสอบ' },
       { id: 'guide', label: 'กลุ่มคำกริยา' }
@@ -304,7 +393,53 @@
     const panel = document.getElementById('jp-panel');
     if (state.tab === 'quiz') renderQuiz(panel);
     else if (state.tab === 'guide') renderGuide(panel);
+    else if (state.tab === 'list') renderList(panel);
     else renderReview(panel);
+  }
+
+  function renderList(panel) {
+    if (state.vocab.length === 0) {
+      panel.innerHTML = `<div class="jp-empty"><span class="jp-empty-glyph">語</span>ยังไม่มีคำศัพท์ในคลัง</div>`;
+      return;
+    }
+    const tags = Array.from(new Set(state.vocab.map(v => v.tag).filter(Boolean))).sort();
+    const filtered = state.vocab.filter(v => !state.filterTag || (v.tag || '') === state.filterTag);
+
+    panel.innerHTML = `
+      ${tags.length > 0 ? `
+        <div class="jp-filter-row">
+          <span>กรองตามบทเรียน:</span>
+          <select id="jp-filter-tag">
+            <option value="" ${state.filterTag === '' ? 'selected' : ''}>ทั้งหมด (${state.vocab.length} คำ)</option>
+            ${tags.map(t => {
+              const count = state.vocab.filter(v => v.tag === t).length;
+              return `<option value="${esc(t)}" ${state.filterTag === t ? 'selected' : ''}>บทที่ ${esc(t)} (${count} คำ)</option>`;
+            }).join('')}
+          </select>
+        </div>
+      ` : `<div style="font-size:12px; color:var(--ink-soft); margin-bottom:14px;">ทั้งหมด ${state.vocab.length} คำ</div>`}
+      ${filtered.length === 0 ? `
+        <div class="jp-empty"><span class="jp-empty-glyph">空</span>ไม่มีคำศัพท์ในบทที่เลือก</div>
+      ` : `
+        <div class="jp-list-grid">
+          ${filtered.map(v => `
+            <div class="jp-item">
+              <div class="jp-item-main">
+                <div class="jp-item-word">${esc(v.word)}${v.reading ? ` <span class="jp-item-reading">${esc(v.reading)}</span>` : ''}</div>
+                ${v.masuForm ? `<div class="jp-item-reading" style="margin-top:1px;">ます: ${esc(v.masuForm)}</div>` : ''}
+                <div class="jp-item-meaning">${esc(v.meaning)}</div>
+                ${(v.tag || v.verbGroup) ? `
+                  <div class="jp-item-tag-row">
+                    ${v.verbGroup ? `<span class="jp-item-verbgroup">กลุ่ม ${esc(v.verbGroup)}</span>` : ''}
+                    ${v.tag ? `<span class="jp-item-tag">${esc(v.tag)}</span>` : ''}
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `}
+    `;
   }
 
   function renderGuide(panel) {
@@ -430,20 +565,30 @@
   }
 
   function renderQuiz(panel) {
-    if (state.vocab.length < 2) {
-      panel.innerHTML = `<div class="jp-empty"><span class="jp-empty-glyph">試</span>ต้องมีคำศัพท์อย่างน้อย 2 คำถึงจะทำแบบทดสอบได้</div>`;
-      return;
-    }
-    if (getFilteredVocab().length === 0) {
-      panel.innerHTML = `
-        ${renderFilterRow()}
-        <div class="jp-empty"><span class="jp-empty-glyph">空</span>ไม่มีคำศัพท์ในกลุ่มที่เลือก<br/>ลองเปลี่ยนตัวกรองดู</div>`;
+    const modeToggle = `
+      <div class="jp-quizmode-row">
+        <button type="button" class="jp-quizmode-btn ${state.quizMode === 'meaning' ? 'active' : ''}" data-action="set-quiz-mode" data-mode="meaning">ทดสอบความหมาย</button>
+        <button type="button" class="jp-quizmode-btn ${state.quizMode === 'group' ? 'active' : ''}" data-action="set-quiz-mode" data-mode="group">ทดสอบกลุ่มคำกริยา</button>
+      </div>
+    `;
+    const showGroupFilter = state.quizMode !== 'group';
+
+    if (state.quizMode === 'meaning' && state.vocab.length < 2) {
+      panel.innerHTML = `${modeToggle}<div class="jp-empty"><span class="jp-empty-glyph">試</span>ต้องมีคำศัพท์อย่างน้อย 2 คำถึงจะทำแบบทดสอบได้</div>`;
       return;
     }
     const q = state.quiz;
+    if (q.tooFew) {
+      panel.innerHTML = `
+        ${modeToggle}
+        ${renderFilterRow(showGroupFilter)}
+        <div class="jp-empty"><span class="jp-empty-glyph">空</span>${state.quizMode === 'group' ? 'ไม่มีคำกริยาที่ระบุกลุ่มไว้ในตัวกรองนี้' : 'ไม่มีคำศัพท์ในกลุ่มที่เลือก'}<br/>ลองเปลี่ยนตัวกรองดู</div>`;
+      return;
+    }
     if (q.finished) {
       panel.innerHTML = `
-        ${renderFilterRow()}
+        ${modeToggle}
+        ${renderFilterRow(showGroupFilter)}
         <div class="jp-quiz-result">
           <div style="color:var(--ink-soft); font-size:14px;">ผลการทดสอบ</div>
           <div class="jp-quiz-score">${q.score} / ${q.questions.length}</div>
@@ -452,11 +597,14 @@
       return;
     }
     const question = q.questions[q.index];
+    const optionLabel = (opt) => question.isGroupQuiz ? ('กลุ่ม ' + opt) : opt;
     panel.innerHTML = `
-      ${renderFilterRow()}
+      ${modeToggle}
+      ${renderFilterRow(showGroupFilter)}
       <div class="jp-quiz-progress">ข้อ ${q.index + 1} / ${q.questions.length} · คะแนน ${q.score}</div>
       <div class="jp-quiz-question">${esc(question.word)}</div>
       ${question.reading ? `<div class="jp-quiz-reading">${esc(question.reading)}</div>` : ''}
+      ${question.isGroupQuiz ? `<div class="jp-quiz-reading" style="margin-bottom:10px;">คำกริยานี้อยู่กลุ่มไหน?</div>` : ''}
       <div class="jp-quiz-options">
         ${question.options.map(opt => {
           let cls = '';
@@ -464,7 +612,7 @@
             if (opt === question.correct) cls = 'correct';
             else if (opt === q.selected) cls = 'incorrect';
           }
-          return `<button class="jp-quiz-option ${cls}" data-action="select-option" data-opt="${esc(opt)}" ${q.selected !== null ? 'disabled' : ''}>${esc(opt)}</button>`;
+          return `<button class="jp-quiz-option ${cls}" data-action="select-option" data-opt="${esc(opt)}" ${q.selected !== null ? 'disabled' : ''}>${esc(optionLabel(opt))}</button>`;
         }).join('')}
       </div>
       ${q.selected !== null ? `<div class="jp-quiz-next-row"><button class="jp-btn" data-action="next-question">${q.index + 1 >= q.questions.length ? 'ดูผลคะแนน' : 'ข้อถัดไป'}</button></div>` : ''}
@@ -485,6 +633,7 @@
       case 'select-option': selectOption(btn.dataset.opt); break;
       case 'next-question': nextQuestion(); break;
       case 'restart-quiz': restartQuiz(); break;
+      case 'set-quiz-mode': setQuizMode(btn.dataset.mode); break;
     }
   }
 
