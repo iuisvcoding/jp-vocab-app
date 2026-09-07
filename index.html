@@ -84,6 +84,18 @@
   .jp-item-tag { display: inline-block; font-size: 11px; color: var(--moss); border: 1px solid var(--moss); border-radius: 3px; padding: 1px 6px; width: fit-content; }
   .jp-item-verbgroup { display: inline-block; font-size: 11px; color: var(--indigo); border: 1px solid var(--indigo-soft); border-radius: 3px; padding: 1px 6px; width: fit-content; }
 
+  .jp-search-input {
+    width: 100%;
+    font-family: var(--thai);
+    font-size: 14px;
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    background: #fff;
+    color: var(--ink);
+    margin-bottom: 12px;
+  }
+  .jp-search-input:focus { outline: 2px solid var(--indigo-soft); outline-offset: 1px; }
   .jp-filter-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-size: 13px; color: var(--ink-soft); flex-wrap: wrap; }
   .jp-filter-row select { font-family: var(--thai); font-size: 13px; padding: 6px 8px; border: 1px solid var(--border); border-radius: 4px; background: #fff; color: var(--ink); }
 
@@ -144,6 +156,22 @@
 
   .jp-list-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
   .jp-list-grid .jp-item { height: 100%; align-items: flex-start; }
+  .jp-item-card { position: relative; display: block; padding-right: 76px; }
+  .jp-item-tag-corner {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 3px;
+    margin-top: 0;
+  }
+  .jp-item-tag-corner .jp-item-tag,
+  .jp-item-tag-corner .jp-item-verbgroup {
+    font-size: 10px;
+    padding: 1px 5px;
+    white-space: nowrap;
+  }
 
   .jp-quizmode-row { display: flex; gap: 8px; margin-bottom: 14px; }
   .jp-quizmode-btn { font-family: var(--thai); font-size: 13px; font-weight: 600; padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border); background: var(--paper); color: var(--ink-soft); cursor: pointer; }
@@ -213,9 +241,10 @@
 
   let state = {
     vocab: VOCAB,
-    tab: 'review',
+    tab: 'list',
     filterGroup: '',
     filterTag: '',
+    searchQuery: '',
     review: { order: [], index: 0, flipped: false, known: 0, dontknow: 0, finished: false },
     quizMode: 'meaning',
     quiz: { questions: [], index: 0, score: 0, selected: null, finished: false, tooFew: false }
@@ -403,9 +432,17 @@
       return;
     }
     const tags = Array.from(new Set(state.vocab.map(v => v.tag).filter(Boolean))).sort();
-    const filtered = state.vocab.filter(v => !state.filterTag || (v.tag || '') === state.filterTag);
+    const q = (state.searchQuery || '').trim().toLowerCase();
+    const filtered = state.vocab.filter(v => {
+      const tagOk = !state.filterTag || (v.tag || '') === state.filterTag;
+      if (!tagOk) return false;
+      if (!q) return true;
+      const haystack = [v.word, v.reading, v.meaning, v.masuForm].filter(Boolean).join(' ').toLowerCase();
+      return haystack.includes(q);
+    });
 
     panel.innerHTML = `
+      <input type="text" id="jp-search-input" class="jp-search-input" placeholder="ค้นหาคำศัพท์ คำอ่าน หรือความหมาย..." value="${esc(state.searchQuery)}" />
       ${tags.length > 0 ? `
         <div class="jp-filter-row">
           <span>กรองตามบทเรียน:</span>
@@ -419,21 +456,21 @@
         </div>
       ` : `<div style="font-size:12px; color:var(--ink-soft); margin-bottom:14px;">ทั้งหมด ${state.vocab.length} คำ</div>`}
       ${filtered.length === 0 ? `
-        <div class="jp-empty"><span class="jp-empty-glyph">空</span>ไม่มีคำศัพท์ในบทที่เลือก</div>
+        <div class="jp-empty"><span class="jp-empty-glyph">空</span>ไม่พบคำศัพท์ที่ตรงกับคำค้นหา</div>
       ` : `
         <div class="jp-list-grid">
           ${filtered.map(v => `
-            <div class="jp-item">
+            <div class="jp-item jp-item-card">
+              ${(v.tag || v.verbGroup) ? `
+                <div class="jp-item-tag-row jp-item-tag-corner">
+                  ${v.verbGroup ? `<span class="jp-item-verbgroup">กลุ่ม ${esc(v.verbGroup)}</span>` : ''}
+                  ${v.tag ? `<span class="jp-item-tag">บท ${esc(v.tag)}</span>` : ''}
+                </div>
+              ` : ''}
               <div class="jp-item-main">
                 <div class="jp-item-word">${esc(v.word)}${v.reading ? ` <span class="jp-item-reading">${esc(v.reading)}</span>` : ''}</div>
                 ${v.masuForm ? `<div class="jp-item-reading" style="margin-top:1px;">ます: ${esc(v.masuForm)}</div>` : ''}
                 <div class="jp-item-meaning">${esc(v.meaning)}</div>
-                ${(v.tag || v.verbGroup) ? `
-                  <div class="jp-item-tag-row">
-                    ${v.verbGroup ? `<span class="jp-item-verbgroup">กลุ่ม ${esc(v.verbGroup)}</span>` : ''}
-                    ${v.tag ? `<span class="jp-item-tag">${esc(v.tag)}</span>` : ''}
-                  </div>
-                ` : ''}
               </div>
             </div>
           `).join('')}
@@ -643,6 +680,36 @@
     if (t.id === 'jp-filter-tag') { setFilterTag(t.value); }
   }
 
+  let isComposingSearch = false;
+
+  function commitSearchQuery(inputEl) {
+    const pos = inputEl.selectionStart;
+    state.searchQuery = inputEl.value;
+    render();
+    const el = document.getElementById('jp-search-input');
+    if (el) {
+      el.focus();
+      try { el.setSelectionRange(pos, pos); } catch (err) {}
+    }
+  }
+
+  function handleAppInput(e) {
+    if (e.target.id === 'jp-search-input' && !isComposingSearch) {
+      commitSearchQuery(e.target);
+    }
+  }
+
+  function handleAppCompositionStart(e) {
+    if (e.target.id === 'jp-search-input') isComposingSearch = true;
+  }
+
+  function handleAppCompositionEnd(e) {
+    if (e.target.id === 'jp-search-input') {
+      isComposingSearch = false;
+      commitSearchQuery(e.target);
+    }
+  }
+
   window.addEventListener('error', function(ev) {
     const banner = document.createElement('div');
     banner.style.cssText = 'background:#F5E4E1;color:#B33A3A;padding:10px 16px;font-size:12px;font-family:sans-serif;border-bottom:1px solid #B33A3A;';
@@ -652,6 +719,9 @@
 
   root.addEventListener('click', handleAppClick);
   root.addEventListener('change', handleAppChange);
+  root.addEventListener('input', handleAppInput);
+  root.addEventListener('compositionstart', handleAppCompositionStart);
+  root.addEventListener('compositionend', handleAppCompositionEnd);
 
   startReview();
   render();
